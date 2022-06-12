@@ -6,51 +6,63 @@ import (
 	"github.com/codeYann/scheduling-go/process"
 )
 
-type Qeue struct {
-	queue []process.Process
-	mutex sync.RWMutex
-}
-
-func CreateQueue() *Qeue {
-	return &Qeue{
+// Create fcfs algorhtim for batch scheduling
+func CreateFCFS() *FCFS {
+	return &FCFS{
 		queue: make([]process.Process, 0),
 	}
 }
 
-func (q *Qeue) Enqueue(pcss *process.Process) {
-	q.mutex.Lock()
-	q.queue = append(q.queue, *pcss)
-	q.mutex.Unlock()
+// FCFS is a first come first serve algorithm for batch scheduling
+type FCFS struct {
+	queue []process.Process
+	sync.Mutex
 }
 
-func (q *Qeue) Dequeue() error {
+// Enqueue adds a process to the queue
+func (q *FCFS) Enqueue(pcss *process.Process) {
+	q.Lock()
+	q.queue = append(q.queue, *pcss)
+	q.Unlock()
+}
+
+// Dequeue removes the first process from the queue
+func (q *FCFS) Dequeue() error {
 	if len(q.queue) > 0 {
-		q.mutex.Lock()
+		q.Lock()
 		q.queue = append(q.queue, q.queue[0])
 		q.queue = q.queue[1:]
-		q.mutex.Unlock()
+		q.Unlock()
 	}
 	return nil
 }
 
-func (q *Qeue) Front() (*process.Process, error) {
+// Front returns the first process in the queue
+func (q *FCFS) Front() (*process.Process, error) {
 	if len(q.queue) > 0 {
-		q.mutex.Lock()
-		defer q.mutex.Unlock()
+		q.Lock()
+		defer q.Unlock()
 		return &q.queue[0], nil
 	}
 	return nil, nil
 }
 
-func (q *Qeue) Back() (*process.Process, error) {
+// Back returns the last process in the queue
+func (q *FCFS) Back() (*process.Process, error) {
 	if len(q.queue) > 0 {
-		q.mutex.Lock()
-		defer q.mutex.Unlock()
+		q.Lock()
+		defer q.Unlock()
 		return &q.queue[len(q.queue)-1], nil
 	}
 	return nil, nil
 }
 
-func (q *Qeue) Size() int {
+// GetSize returns the size of the queue
+func (q *FCFS) GetSize() int {
 	return len(q.queue)
+}
+
+// GetQueue returns the queue
+func (q *FCFS) GetQueue() []process.Process {
+	return q.queue
 }
